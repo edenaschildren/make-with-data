@@ -47,15 +47,15 @@ This Hackathon is intended to get the community to participate in making maps ba
 
 - Sources – Are sources appropriately credited/cited?
 
-Disclaimers - Any disclaimers provided in the metadata / data dictionary for the variables used must be included on the map
+- Disclaimers - Any disclaimers provided in the metadata / data dictionary for the variables used must be included on the map
 
 <h4>Presentation 40pts</h4>
 
-Visualization, Visual appeal (color coordination, accents, highlights, use of  classification)
+- Visualization, Visual appeal (color coordination, accents, highlights, use of  classification)
 
 - Legibility (font, font size, figures, tables, graphics) – Are fonts, text size, and labels configured in a way that is legible? 
 
-Design/Layout – Do the graphical elements follow a logical arrangement? Your map should include standard cartographic elements: title, legend, and major data sources listed.
+- Design/Layout – Do the graphical elements follow a logical arrangement? Your map should include standard cartographic elements: title, legend, and major data sources listed.
 
 
 <h4>Creativity 20 pts</h4>
@@ -115,7 +115,9 @@ Use this form to submit your map:   </p>
 
 <h2>comment out until day of hackathon </h2><!---    here   -->
 
-<h3><a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank" rel="noopener noreferrer"> Hackathon for Make-With-Data: Mapping Mental Health Data Dictionary: INSERT SHORT URL HERE    </a> </h3>
+<h3> Data Dictionary </h3>
+
+<a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank" rel="noopener noreferrer"> Hackathon for Make-With-Data: Mapping Mental Health Data Dictionary: INSERT SHORT URL HERE    </a>
 
 <h3 align="left">Reference Data Files</h3>
 
