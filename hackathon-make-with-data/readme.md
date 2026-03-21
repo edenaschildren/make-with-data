@@ -113,7 +113,7 @@ Use this form to submit your map:   </p>
 
 <h4> Winners will be announced on Saturday March 28th </h4>
 
-<h2>comment out until day of hackathon </h2><!---    here   -->
+<!-- <h2>comment out until day of hackathon </h2>      -->
 
 <h3> Data Dictionary </h3>
 
