@@ -121,10 +121,11 @@ Use this form to submit your map:   </p>
 
 <h3 align="left">Reference Data Files</h3>
 
-| Geography | Data File | 
+| Name | Data File | 
 | --- | --- | 
-| NYC Borough Boundary | Link 
-| NYC United Health Fund (UHF) 42 / Neighborhood Boundaries | Link |
+| NYC Borough Boundaries | [NYC_Borough_Boundaries.geojson](data/NYC_Borough_Boundaries.geojson )
+| NYC Neighborhood Names | [NYC_Neighborhood_Names.geojson](data/NYC_Neighborhood_Names.geojson ) 
+| NYC Metropolitan Area Counties | [NYC_Metro_Counties.geojson](data/NYC_Metro_Counties.geojson ) 
 
 
 
