@@ -107,15 +107,25 @@ Design/Layout – Do the graphical elements follow a logical arrangement? Your m
 
 <p>Map Submissions are due Thursday March 26th by Midnight 
 Use this form to submit your map:   </p> 
- <a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank">Submit your final make-with-data map! </a>
+ <a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank" rel="noopener noreferrer">Submit your final make-with-data map! </a> INSERT SHORT URL HERE
 
+<h4> Judges will score the maps virtually on Friday March 27th  </h4>
 
-<h4> Friday </h4>
-<h4> Saturday </h4>
+<h4> Winners will be announced on Saturday March 28th </h4>
 
-<h4>comment out until day of hackathon </h4><!---    here   -->
+<h2>comment out until day of hackathon </h2><!---    here   -->
+
+<h3><a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank" rel="noopener noreferrer"> Hackathon for Make-With-Data: Mapping Mental Health Data Dictionary: INSERT SHORT URL HERE    </a> </h3>
 
 <h3 align="left">Reference Data Files</h3>
+
+| Geography | Data File | 
+| --- | --- | 
+| NYC Borough Boundary | Link 
+| NYC United Health Fund (UHF) 42 / Neighborhood Boundaries | Link |
+
+
+
 <h3 align="left">NYC Community Health Survey (CHS) Data</h3>
 <h5> New York City Department of Health, Environment & Health Data Portal. Mental health data. Depression (adults). Accessed at https://a816-dohbesp.nyc.gov/IndicatorPublic/data-explorer/mental-health/?id=2417 </h5>
 
@@ -123,7 +133,17 @@ Use this form to submit your map:   </p>
 
 | Variable | Measure | Year  | Geography | Data File | 
 | --- | --- | --- | --- | --- | 
-| Depression | Age-adjusted Percent (%) | 2017-2018 | Borough | [CHS_Borough_Depression_Age_adjusted_Percent_2017_2018.geojson](data/CHS_Borough_Depression_Age_adjusted_Percent_2017_2018.geojson) | 
+| Depression | Age-adjusted Percent (%) | 2017-2018 | Borough | [CHS_Borough_Depression_Age_adjusted_Percent_2017_2018.geojson](data/CHS_Borough_Depression_Age_adjusted_Percent_2017_2018.geojson) 
+| Depression | Age-adjusted Percent (%) | 2021-2022 | Borough | [CHS_Borough_Depression_Age_adjusted_Percent_2021_2022.geojson](data/CHS_Borough_Depression_Age_adjusted_Percent_2021_2022.geojson)  
+| Depression | Percent (%) | 2017-2018 | Borough | [CHS_Borough_Depression_Percent_2017_2018.geojson](data/CHS_Borough_Depression_Percent_2017_2018.geojson) 
+| Depression | Percent (%) | 2021-2022 | Borough | [CHS_Borough_Depression_Percent_2021_2022.geojson](data/CHS_Borough_Depression_Percent_2021_2022.geojson)
+| Depression | Age-adjusted Percent (%) | 2017-2018 | Neighborhood | [CHS_UHF42_Depression_Age_adjusted_Percent_2017_2018.geojson](data/CHS_Borough_Depression_Age_adjusted_Percent_2017_2018.geojson) 
+| Depression | Age-adjusted Percent (%) | 2021-2022 | Neighborhood | [CHS_UHF42_Depression_Age_adjusted_Percent_2021_2022.geojson](data/CHS_Borough_Depression_Age_adjusted_Percent_2021_2022.geojson) 
+| Depression | Age-adjusted Percent (%) | 2017-2018 | Neighborhood | [CHS_UHF42_Depression_Percent_2017_2018.geojson](data/CHS_Borough_Depression_Percent_2017_2018.geojson)
+| Depression | Age-adjusted Percent (%) | 2021-2022 | Neighborhood | [CHS_UHF42_Depression_Percent_2017_2018.geojson](data/CHS_Borough_Depression_Percent_2021_2022.geojson)
+
+
+
 
 
 
