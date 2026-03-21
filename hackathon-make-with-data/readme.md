@@ -1,10 +1,10 @@
-# hackathon-make-with-data
-<h1 align="center">Hackathon for Make-With-Data: Mapping Mental Health Repository</h1>
+<!---# hackathon-make-with-data-->
+<h2 align="center">Hackathon for Make-With-Data: Mapping Mental Health Repository</h2>
 
 
 ![image alt](https://github.com/edenaschildren/make-with-data/blob/main/images/make-with-data-hackathon-march-2026_banner.png)
 
-<h1 align="center">Overview</h1>
+<h3 align="left">Overview</h3>
 
 Make-With-Data supports the research of community-based challenges, primarily related to local conservation, sustainability, and mental health. The workshops are full of activities that align real world challenges with data sources and scientific methods to explore solutions that simultaneously teach important mapping and data science skills.
 
@@ -14,9 +14,116 @@ The “Make-With-Data: Mapping Mental Health” workshop series is culminating w
 
 This Hackathon is intended to get the community to participate in making maps based on data that we found suitable, for the purpose of establishing a baseline understanding of the state of mental health in NYC. 
 
+<h3 align="left">Audience </h3>
 
-<h1 align="center">Reference Data Files</h1>
+<p>The target audience for this hackathon is anyone interested in making maps related to mental health. We invite all curious students, community members, and professionals from across disciplines to participate in this event.</p>
+
+<p>Main takeaways are awareness of mental health data, skills in basic statistics and mapping techniques. </p>
+
+<p>Participants will make-a-map of depression in NYC, which they can share with their community to increase awareness and/or add to their portfolio and increase their visibility and network.</p>
 
 
 
-<h1 align="center">NYC Community Health Survey (CHS) Data</h1>
+  
+<h3 align="left">Theme </h3>
+<p>Depression is a mental health condition that has been measured in NYC over the past 20+ years. The data we'll use is publicly available at NYC (citywide), Borough, and Neighborhood geographic levels for the select years between 2017-2022. </p>
+
+<p>We'll present the definition for the depression variables, basic data science techniques to obtain statistics about the data, mapping techniques used for this type of data, and options for how to tell a story using this type of data, then you will use what you know to make-with-the-data.</p>
+
+<p>Let's dive in a see what you can make!</p>
+
+
+
+<h3 align="left"> Map criteria</h3>
+
+<p>Original work! Do not use AI for any part of this process. You can use the Internet for research however making the map must be your own work. </p>
+
+
+<h4 >Content 40pts</h4>
+
+- Effective communication / Storytelling -  Is the map’s story clear? Does the content support the map’s intended purpose?
+
+- Effective use of basic statistics 
+
+- Sources – Are sources appropriately credited/cited?
+
+Disclaimers - Any disclaimers provided in the metadata / data dictionary for the variables used must be included on the map
+
+<h4>Presentation 40pts</h4>
+
+Visualization, Visual appeal (color coordination, accents, highlights, use of  classification)
+
+- Legibility (font, font size, figures, tables, graphics) – Are fonts, text size, and labels configured in a way that is legible? 
+
+Design/Layout – Do the graphical elements follow a logical arrangement? Your map should include standard cartographic elements: title, legend, and major data sources listed.
+
+
+<h4>Creativity 20 pts</h4>
+
+- Overall impact
+
+- Is there anything unique?
+
+<h3>Prizes</h3>
+<p>All participants will receive a digital certificate acknowledging their map entry (upon request). Winning maps will be displayed on the Edenas Children website and social media. </p>
+-
+
+- 1st place, $100
+- 2nd place, $50
+- 3rd place, $25
+- 4th place, honey bear
+- 5th place, honey bear 
+ 
+  
+
+<h3>Judges</h3>
+- 
+
+- Swati Sharma, Urban Planner
+- Allison Lacko, PhD, Research Scientist
+- Daniel Bader, Climate Scientist
+- Jeffrey Rothstein, PhD, Artist and Photographer 
+- Neil Mendeloff and Christopher Baptiste, Edenas Children Board of Directors 
+
+
+<h3>Timeline and Agenda</h3>
+
+<h4>In-Person Agenda 3/25:</h4>
+- 
+
+- 1:15 - 1:30 - Networking
+- 1:30 - 1:45 - Welcome and Breathwork Exercise              
+- 1:45 - 2:00 - Introductions
+- 2:00 - 2:45 - Make-With-Data Workshop 
+- 2:45 - 3:00 - BREAK — Q/A 
+- 3:00 - 4:30 - Hackathon
+- 4:30 - 5:00 - Break -- Q/A -- Light food and refreshments
+- 5:00 - 7:00 - Hackathon
+- 7:15 - 7:25 - Q/A, Recap and Next Steps
+- 7:25 - 7:30 - Closing and Breathwork Exercise
+- 7:30 - 7:45 - Networking
+
+<h4> Submit Map 3/26</h4>
+
+<p>Map Submissions are due Thursday March 26th by Midnight 
+Use this form to submit your map:   </p>
+
+
+<h4> Friday </h4>
+<h4> Saturday </h4>
+
+<h4>comment out until day of hackathon </h4><!---    here   -->
+
+<h3 align="left">Reference Data Files</h3>
+<h3 align="left">NYC Community Health Survey (CHS) Data</h3>
+<h5> New York City Department of Health, Environment & Health Data Portal. Mental health data. Depression (adults). Accessed at https://a816-dohbesp.nyc.gov/IndicatorPublic/data-explorer/mental-health/?id=2417 </h5>
+
+
+
+| Variable | Measure | Year  | Geography | Data File | 
+| --- | --- | --- | --- | --- | 
+| Depression | Age-adjusted Percent (%) | 2017-2018 | Borough | [CHS_Borough_Depression_Age_adjusted_Percent_2017_2018.geojson](data/CHS_Borough_Depression_Age_adjusted_Percent_2017_2018.geojson) | 
+
+
+
+
