@@ -32,7 +32,10 @@ This Hackathon is intended to get the community to participate in making maps ba
 
 <p>Let's dive in a see what you can make!</p>
 
+<h3>Software</h3>
+<p>While you are free to use any mapping platform that you choose, we will be workshopping with QGIS, a free and open source software. You can prepare by having the software already installed on your system. </p>
 
+<p>Download QGIS for your computer platform here: <a href="https://qgis.org/download/"> https://qgis.org/download/ </a></p>
 
 <h3 align="left"> Map criteria</h3>
 
