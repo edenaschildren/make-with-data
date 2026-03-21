@@ -2,7 +2,8 @@
 <h2 align="center">Hackathon for Make-With-Data: Mapping Mental Health Repository</h2>
 
 
-![image alt](https://github.com/edenaschildren/make-with-data/blob/main/images/make-with-data-hackathon-march-2026_banner.png)
+<!---![image alt](https://github.com/edenaschildren/make-with-data/blob/main/images/make-with-data-hackathon-march-2026_banner.png)-->
+<img src="https://github.com/edenaschildren/make-with-data/blob/main/images/make-with-data-hackathon-march-2026_banner.png" alt="Make-With-Data_Hackathon_banner" width="400" >
 
 <h3 align="left">Overview</h3>
 
@@ -21,7 +22,6 @@ This Hackathon is intended to get the community to participate in making maps ba
 <p>Main takeaways are awareness of mental health data, skills in basic statistics and mapping techniques. </p>
 
 <p>Participants will make-a-map of depression in NYC, which they can share with their community to increase awareness and/or add to their portfolio and increase their visibility and network.</p>
-
 
 
   
@@ -106,7 +106,8 @@ Design/Layout – Do the graphical elements follow a logical arrangement? Your m
 <h4> Submit Map 3/26</h4>
 
 <p>Map Submissions are due Thursday March 26th by Midnight 
-Use this form to submit your map:   </p>
+Use this form to submit your map:   </p> 
+ <a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank">Submit your final make-with-data map! </a>
 
 
 <h4> Friday </h4>
