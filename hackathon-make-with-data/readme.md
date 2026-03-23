@@ -32,62 +32,6 @@ This Hackathon is intended to get the community to participate in making maps ba
 
 <p>Let's dive in a see what you can make!</p>
 
-<h3>Software</h3>
-<p>While you are free to use any mapping platform that you choose, we will be workshopping with QGIS, a free and open source software. You can prepare by having the software already installed on your system. </p>
-
-<p>Download QGIS for your computer platform here: <a href="https://qgis.org/download/"> https://qgis.org/download/ </a></p>
-
-<h3 align="left"> Map criteria</h3>
-
-<p>Original work! Do not use AI for any part of this process. You can use the Internet for research however making the map must be your own work. </p>
-
-
-<h4 >Content 40pts</h4>
-
-- Effective communication / Storytelling -  Is the map’s story clear? Does the content support the map’s intended purpose?
-
-- Effective use of basic statistics 
-
-- Sources – Are sources appropriately credited/cited?
-
-- Disclaimers - Any disclaimers provided in the metadata / data dictionary for the variables used must be included on the map
-
-<h4>Presentation 40pts</h4>
-
-- Visualization, Visual appeal (color coordination, accents, highlights, use of  classification)
-
-- Legibility (font, font size, figures, tables, graphics) – Are fonts, text size, and labels configured in a way that is legible? 
-
-- Design/Layout – Do the graphical elements follow a logical arrangement? Your map should include standard cartographic elements: title, legend, and major data sources listed.
-
-
-<h4>Creativity 20 pts</h4>
-
-- Overall impact
-
-- Is there anything unique?
-
-<h3>Prizes</h3>
-<p>All participants will receive a digital certificate acknowledging their map entry (upon request). Winning maps will be displayed on the Edenas Children website and social media. </p>
--
-
-- 1st place, $100
-- 2nd place, $50
-- 3rd place, $25
-- 4th place, honey bear
-- 5th place, honey bear 
- 
-  
-
-<h3>Judges</h3>
-- 
-
-- Swati Sharma, Urban Planner
-- Allison Lacko, PhD, Research Scientist
-- Daniel Bader, Climate Scientist
-- Jeffrey Rothstein, PhD, Artist and Photographer 
-- Neil Mendeloff and Christopher Baptiste, Edenas Children Board of Directors 
-
 
 <h3>Timeline and Agenda</h3>
 
@@ -116,11 +60,13 @@ Use this form to submit your map:   </p>
 
 <h4> Winners will be announced on Saturday March 28th </h4>
 
-<!-- <h2>comment out until day of hackathon </h2>      -->
 
-<h3> Data Dictionary </h3>
+<h2>Make-With-Data Instructions</h2>
 
-<a href="https://docs.google.com/spreadsheets/d/1SrCfiKLkepWn8gITGjPI-WpDCNl1ovNp9nJhaIJYegU/edit?usp=sharing" target="_blank" rel="noopener noreferrer"> Hackathon for Make-With-Data: Mapping Mental Health Data Dictionary </a>
+<h3>Software</h3>
+<p>While you are free to use any mapping platform that you choose, we will be workshopping with QGIS, a free and open source software. You can prepare by having the software already installed on your system. </p>
+
+<p>Download QGIS for your computer platform here: <a href="https://qgis.org/download/"> https://qgis.org/download/ </a></p>
 
 <h3 align="left">Reference Data Files</h3>
 
@@ -138,7 +84,9 @@ Use this form to submit your map:   </p>
 <h4>Use this citation on your map: New York City Department of Health, Environment & Health Data Portal. Mental health data. Depression (adults). Accessed at https://a816-dohbesp.nyc.gov/IndicatorPublic/data-explorer/mental-health/?id=2417 </h4>
 
 
-<p></p>
+<h3> Data Dictionary </h3>
+
+<a href="https://docs.google.com/spreadsheets/d/1SrCfiKLkepWn8gITGjPI-WpDCNl1ovNp9nJhaIJYegU/edit?usp=sharing" target="_blank" rel="noopener noreferrer"> Hackathon for Make-With-Data: Mapping Mental Health Data Dictionary </a>
 
 
 | Variable | Measure | Year  | Geography | Data File | 
@@ -155,6 +103,61 @@ Use this form to submit your map:   </p>
 
 
 
+<h3 align="left"> Map criteria</h3>
+
+<p>Original work! Do not use AI for any part of this process. You can use the Internet for research however making the map must be your own work. </p>
+
+<h4>Map Submissions are due Thursday March 26th by Midnight 
+Use this form to submit your map:   </h4> 
+ <a href="https://forms.gle/fdiCXiY4S7rq1MXT8" target="_blank" rel="noopener noreferrer">Submit your final make-with-data map! </a>
+
+<h4 >Content 40pts</h4>
+
+- Effective communication / Storytelling -  Is the map’s story clear? Does the content support the map’s intended purpose?
+
+- Effective use of basic statistics 
+
+- Sources – Are sources appropriately credited/cited?
+
+- Disclaimers - Any disclaimers provided in the metadata / data dictionary for the variables used must be included on the map
+
+<h4>Presentation 40pts</h4>
+
+- Visualization, Visual appeal (color coordination, accents, highlights, use of  classification)
+
+- Legibility (font, font size, figures, tables, graphics) – Are fonts, text size, and labels configured in a way that is legible? 
+
+- Design/Layout – Do the graphical elements follow a logical arrangement?
+  
+- Your map should include standard cartographic elements: title, legend, and major data sources listed.
+
+
+<h4>Creativity 20 pts</h4>
+
+- Overall impact
+
+- Is there anything unique?
+
+<h3>Prizes</h3>
+<p>All participants will receive a digital certificate acknowledging their map entry (upon request). Winning maps will be displayed on the Edenas Children website and social media. </p>
+-
+
+- 1st place, $100
+- 2nd place, $50
+- 3rd place, $25
+- 4th place, honey bear
+- 5th place, honey bear 
+ 
+  
+
+<h3>Judges</h3>
+- 
+
+- Swati Sharma, Urban Planner
+- Allison Lacko, PhD, Research Scientist
+- Daniel Bader, Climate Scientist
+- Jeffrey Rothstein, PhD, Artist and Photographer 
+- Neil Mendeloff and Christopher Baptiste, Edenas Children Board of Directors 
 
 
 
