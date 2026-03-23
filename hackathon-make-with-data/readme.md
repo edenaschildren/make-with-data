@@ -110,7 +110,7 @@ This Hackathon is intended to get the community to participate in making maps ba
 
 <p>Map Submissions are due Thursday March 26th by Midnight 
 Use this form to submit your map:   </p> 
- <a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank" rel="noopener noreferrer">Submit your final make-with-data map! </a> INSERT SHORT URL HERE
+ <a href="https://forms.gle/fdiCXiY4S7rq1MXT8" target="_blank" rel="noopener noreferrer">Submit your final make-with-data map! </a>
 
 <h4> Judges will score the maps virtually on Friday March 27th  </h4>
 
@@ -120,7 +120,7 @@ Use this form to submit your map:   </p>
 
 <h3> Data Dictionary </h3>
 
-<a href="https://docs.google.com/forms/d/10mkMDAozDe7o_W1cNIZ5-05Dp9_XPLk_s9LtU0Cccx4/edit?usp=sharing_eip&ts=69bc1866" target="_blank" rel="noopener noreferrer"> Hackathon for Make-With-Data: Mapping Mental Health Data Dictionary: INSERT SHORT URL HERE    </a>
+<a href="https://docs.google.com/spreadsheets/d/1SrCfiKLkepWn8gITGjPI-WpDCNl1ovNp9nJhaIJYegU/edit?usp=sharing" target="_blank" rel="noopener noreferrer"> Hackathon for Make-With-Data: Mapping Mental Health Data Dictionary </a>
 
 <h3 align="left">Reference Data Files</h3>
 
@@ -133,8 +133,12 @@ Use this form to submit your map:   </p>
 
 
 <h3 align="left">NYC Community Health Survey (CHS) Data</h3>
-<h5> New York City Department of Health, Environment & Health Data Portal. Mental health data. Depression (adults). Accessed at https://a816-dohbesp.nyc.gov/IndicatorPublic/data-explorer/mental-health/?id=2417 </h5>
+<p>The original data downloaded from the NYC DOH Environment & Health Data Portal are text files with location information. We joined the text files to NYC Borough Boundaries and United Health Fund (UHF42) Boundaries. UHF are used to represent Neighborhoods. The resulting data files below are map-ready for your use.</p>
 
+<h4>Use this citation on your map: New York City Department of Health, Environment & Health Data Portal. Mental health data. Depression (adults). Accessed at https://a816-dohbesp.nyc.gov/IndicatorPublic/data-explorer/mental-health/?id=2417 </h4>
+
+
+<p></p>
 
 
 | Variable | Measure | Year  | Geography | Data File | 
