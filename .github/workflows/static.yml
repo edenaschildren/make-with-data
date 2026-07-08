@@ -34,10 +34,10 @@ jobs:
         run: mkdir deployment
 
       - name: Copy first site files
-        run: cp -r maps/nyc-mental-health-facilities/* deployment/
+        run: cp -r make-with-data/maps/nyc-mental-health-facilities/* deployment/
 
       - name: Copy second site files
-        run: cp -r maps/nyc-mental-health-facilities/* deployment/second/
+        run: cp -r make-with-data/maps/nyc-mental-health-facilities/* deployment/second/
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
