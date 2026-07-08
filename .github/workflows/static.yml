@@ -26,8 +26,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      baseurl: "/maps/nyc-mental-health-facilities"
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: "${{ steps.deployment.outputs.page_url }}/maps/nyc-mental-health-facilities/"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
