@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/MarkerCluster.css">
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Make-With-Data: Mapping Mental Health</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <script src="data/PercentofDepressionbyborough20172018_1.js"></script>
+        <script src="data/PercentofDepressionbyborough20212022_2.js"></script>
+        <script src="data/PercentofDepressionbyneighborhood20172018_3.js"></script>
+        <script src="data/PercentofDepressionbyneighborhood20212022_4.js"></script>
+        <script src="data/NYCNeighborhoodNames_5.js"></script>
+        <script src="data/MentalHealthFacilityClusters_6.js"></script>
+        <script src="data/MentalHealthFacilities_7.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[40.58521029504494,-74.10638173612868],[40.84423652481552,-73.81375283608425]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // modify popup if contains media
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (imgTd) {
+                var src = imgTd.getAttribute('src');
+                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
+                    var audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = src;
+                    imgTd.parentNode.replaceChild(audio, imgTd);
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
+                    var video = document.createElement('video');
+                    video.controls = true;
+                    video.src = src;
+                    video.style.width = "400px";
+                    video.style.height = "300px";
+                    video.style.maxHeight = "60vh";
+                    video.style.maxWidth = "60vw";
+                    imgTd.parentNode.replaceChild(video, imgTd);
+                    popup._contentNode.classList.add('media');
+                    // Aggiorna il popup quando il video carica i metadati
+                    video.addEventListener('loadedmetadata', function() {
+                        popup.update();
+                    });
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else {
+                    popup._contentNode.classList.remove('media');
+                }
+            } else {
+                popup._contentNode.classList.remove('media');
+            }
+        }
+        var title = new L.Control({'position':'topleft'});
+        title.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        title.update = function () {
+            this._div.innerHTML = '<h2>Make-With-Data: Mapping Mental Health</h2>';
+        };
+        title.addTo(map);
+        var abstract = new L.Control({'position':'topleft'});
+        abstract.onAdd = function (map) {
+            this._div = L.DomUtil.create('div',
+            'leaflet-control abstract');
+            this._div.id = 'abstract'
+                this._div.setAttribute("onmouseenter", "abstract.show()");
+                this._div.setAttribute("onmouseleave", "abstract.hide()");
+                this.hide();
+                return this._div;
+            };
+            abstract.hide = function () {
+                this._div.classList.remove("abstractUncollapsed");
+                this._div.classList.add("abstract");
+                this._div.innerHTML = 'i'
+            }
+            abstract.show = function () {
+                this._div.classList.remove("abstract");
+                this._div.classList.add("abstractUncollapsed");
+                this._div.innerHTML = 'Make-With-Data supports the research of community-based challenges, primarily related to local conservation, sustainability, and mental health. The workshops are full of activities that align real world challenges with data sources and scientific methods to explore solutions that simultaneously teach important mapping and data science skills.<br /><br />DNM Geospatial is assisting Edenas Children to obtain a baseline for understanding the state of mental health in NYC and how it correlates with environmental, socioeconomic and demographic variables.<br /><br />Mental Health facilities are distributed unevenly throughout the city, denser in Manhattan, Brooklyn, and the south Bronx. Most of these Mental Health facilities are private institutions. <br /><br />Depression is a mental health condition that has been measured in NYC over the past 20+ years. We don\'t feel that the data accurately reflects the number of people who have experienced Depression during these time periods, however it is the most comprehensive data available, and the survey methods for these dates has been consistent. The data shown here are Percent and Age-adjusted Percent of Depression at Neighborhood and Borough geographies for selected years 2017-2018 and 2021-2022. <br /><br />According to this data: What patterns can you observe? Which borough is the most/least depressed? Which neighborhoods are more/less depressed? Can you tell which neighborhoods have increased or decreased levels of depression?<br /><br />Data citations:<br />New York City Department City Planning. Facilities Database (October 2025 (25v2)). Accessed at https://www.nyc.gov/content/planning/pages/resources/datasets/facilities<br /><br />New York City Department of Health, Environment & Health Data Portal. Mental health data. Depression (adults). Accessed at https://a816-dohbesp.nyc.gov/IndicatorPublic/data-explorer/mental-health/?id=2417<br /><br />';
+        };
+        abstract.addTo(map);
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_CartoDbDarkMatter_0');
+        map.getPane('pane_CartoDbDarkMatter_0').style.zIndex = 400;
+        var layer_CartoDbDarkMatter_0 = L.tileLayer('http://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+            pane: 'pane_CartoDbDarkMatter_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+        });
+        layer_CartoDbDarkMatter_0;
+        map.addLayer(layer_CartoDbDarkMatter_0);
+        function pop_PercentofDepressionbyborough20172018_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['BoroCode'] !== null ? autolinker.link(String(feature.properties['BoroCode']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['BoroName'] !== null ? autolinker.link(String(feature.properties['BoroName']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Leng'] !== null ? autolinker.link(String(feature.properties['Shape_Leng']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area'] !== null ? autolinker.link(String(feature.properties['Shape_Area']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_GeoID'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_GeoID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_GeoType'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_GeoType']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_TimePeriodID'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_TimePeriodID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_Value'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_Value']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_CI'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_CI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_Note'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_Note']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_GeoTypeDesc'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_GeoTypeDesc']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_Lat'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_Lat']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_Long'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_Long']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_TimePeriod'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_TimePeriod']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Percent_2017_2018_Indicator'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_Indicator']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PercentofDepressionbyborough20172018_1_0(feature) {
+            if (feature.properties['Percent_2017_2018_Value'] >= 6.700000 && feature.properties['Percent_2017_2018_Value'] <= 10.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20172018_1',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(225,225,225,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2017_2018_Value'] >= 10.000000 && feature.properties['Percent_2017_2018_Value'] <= 12.500000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20172018_1',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,248,251,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2017_2018_Value'] >= 12.500000 && feature.properties['Percent_2017_2018_Value'] <= 15.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20172018_1',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,187,217,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2017_2018_Value'] >= 15.000000 && feature.properties['Percent_2017_2018_Value'] <= 17.500000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20172018_1',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(137,107,177,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_PercentofDepressionbyborough20172018_1');
+        map.getPane('pane_PercentofDepressionbyborough20172018_1').style.zIndex = 401;
+        map.getPane('pane_PercentofDepressionbyborough20172018_1').style['mix-blend-mode'] = 'normal';
+        var layer_PercentofDepressionbyborough20172018_1 = new L.geoJson(json_PercentofDepressionbyborough20172018_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PercentofDepressionbyborough20172018_1',
+            layerName: 'layer_PercentofDepressionbyborough20172018_1',
+            pane: 'pane_PercentofDepressionbyborough20172018_1',
+            onEachFeature: pop_PercentofDepressionbyborough20172018_1,
+            style: style_PercentofDepressionbyborough20172018_1_0,
+        });
+        bounds_group.addLayer(layer_PercentofDepressionbyborough20172018_1);
+        function pop_PercentofDepressionbyborough20212022_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">BoroName</th>\
+                        <td class="visible-with-data" id="BoroName">' + (feature.properties['BoroName'] !== null ? autolinker.link(String(feature.properties['BoroName']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Percent_2021_2022_TimePeriodID</th>\
+                        <td class="visible-with-data" id="Percent_2021_2022_TimePeriodID">' + (feature.properties['Percent_2021_2022_TimePeriodID'] !== null ? autolinker.link(String(feature.properties['Percent_2021_2022_TimePeriodID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Percent_2021_2022_Value</th>\
+                        <td class="visible-with-data" id="Percent_2021_2022_Value">' + (feature.properties['Percent_2021_2022_Value'] !== null ? autolinker.link(String(feature.properties['Percent_2021_2022_Value']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PercentofDepressionbyborough20212022_2_0(feature) {
+            if (feature.properties['Percent_2021_2022_Value'] >= 10.500000 && feature.properties['Percent_2021_2022_Value'] <= 12.500000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20212022_2',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,248,251,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2021_2022_Value'] >= 12.500000 && feature.properties['Percent_2021_2022_Value'] <= 15.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20212022_2',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,187,217,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2021_2022_Value'] >= 15.000000 && feature.properties['Percent_2021_2022_Value'] <= 17.500000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20212022_2',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(137,107,177,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2021_2022_Value'] >= 17.500000 && feature.properties['Percent_2021_2022_Value'] <= 20.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyborough20212022_2',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(129,15,124,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_PercentofDepressionbyborough20212022_2');
+        map.getPane('pane_PercentofDepressionbyborough20212022_2').style.zIndex = 402;
+        map.getPane('pane_PercentofDepressionbyborough20212022_2').style['mix-blend-mode'] = 'normal';
+        var layer_PercentofDepressionbyborough20212022_2 = new L.geoJson(json_PercentofDepressionbyborough20212022_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PercentofDepressionbyborough20212022_2',
+            layerName: 'layer_PercentofDepressionbyborough20212022_2',
+            pane: 'pane_PercentofDepressionbyborough20212022_2',
+            onEachFeature: pop_PercentofDepressionbyborough20212022_2,
+            style: style_PercentofDepressionbyborough20212022_2_0,
+        });
+        bounds_group.addLayer(layer_PercentofDepressionbyborough20212022_2);
+        function pop_PercentofDepressionbyneighborhood20172018_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">UHF_NEIGH</th>\
+                        <td class="visible-with-data" id="UHF_NEIGH">' + (feature.properties['UHF_NEIGH'] !== null ? autolinker.link(String(feature.properties['UHF_NEIGH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">BOROUGH</th>\
+                        <td class="visible-with-data" id="BOROUGH">' + (feature.properties['BOROUGH'] !== null ? autolinker.link(String(feature.properties['BOROUGH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Percent_2017_2018_TimePeriodID</th>\
+                        <td class="visible-with-data" id="Percent_2017_2018_TimePeriodID">' + (feature.properties['Percent_2017_2018_TimePeriodID'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_TimePeriodID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Percent_2017_2018_Value</th>\
+                        <td class="visible-with-data" id="Percent_2017_2018_Value">' + (feature.properties['Percent_2017_2018_Value'] !== null ? autolinker.link(String(feature.properties['Percent_2017_2018_Value']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PercentofDepressionbyneighborhood20172018_3_0(feature) {
+            if (feature.properties['Percent_2017_2018_Value'] >= 5.000000 && feature.properties['Percent_2017_2018_Value'] <= 10.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20172018_3',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,248,251,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2017_2018_Value'] >= 10.000000 && feature.properties['Percent_2017_2018_Value'] <= 15.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20172018_3',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,187,217,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2017_2018_Value'] >= 15.000000 && feature.properties['Percent_2017_2018_Value'] <= 20.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20172018_3',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(137,107,177,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2017_2018_Value'] >= 20.000000 && feature.properties['Percent_2017_2018_Value'] <= 25.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20172018_3',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(129,15,124,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_PercentofDepressionbyneighborhood20172018_3');
+        map.getPane('pane_PercentofDepressionbyneighborhood20172018_3').style.zIndex = 403;
+        map.getPane('pane_PercentofDepressionbyneighborhood20172018_3').style['mix-blend-mode'] = 'normal';
+        var layer_PercentofDepressionbyneighborhood20172018_3 = new L.geoJson(json_PercentofDepressionbyneighborhood20172018_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PercentofDepressionbyneighborhood20172018_3',
+            layerName: 'layer_PercentofDepressionbyneighborhood20172018_3',
+            pane: 'pane_PercentofDepressionbyneighborhood20172018_3',
+            onEachFeature: pop_PercentofDepressionbyneighborhood20172018_3,
+            style: style_PercentofDepressionbyneighborhood20172018_3_0,
+        });
+        bounds_group.addLayer(layer_PercentofDepressionbyneighborhood20172018_3);
+        function pop_PercentofDepressionbyneighborhood20212022_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">UHF_NEIGH</th>\
+                        <td class="visible-with-data" id="UHF_NEIGH">' + (feature.properties['UHF_NEIGH'] !== null ? autolinker.link(String(feature.properties['UHF_NEIGH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">BOROUGH</th>\
+                        <td class="visible-with-data" id="BOROUGH">' + (feature.properties['BOROUGH'] !== null ? autolinker.link(String(feature.properties['BOROUGH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Percent_2021_2022_TimePeriodID</th>\
+                        <td class="visible-with-data" id="Percent_2021_2022_TimePeriodID">' + (feature.properties['Percent_2021_2022_TimePeriodID'] !== null ? autolinker.link(String(feature.properties['Percent_2021_2022_TimePeriodID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Percent_2021_2022_Value</th>\
+                        <td class="visible-with-data" id="Percent_2021_2022_Value">' + (feature.properties['Percent_2021_2022_Value'] !== null ? autolinker.link(String(feature.properties['Percent_2021_2022_Value']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PercentofDepressionbyneighborhood20212022_4_0(feature) {
+            if (feature.properties['Percent_2021_2022_Value'] >= 3.500000 && feature.properties['Percent_2021_2022_Value'] <= 10.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20212022_4',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,248,251,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2021_2022_Value'] >= 10.000000 && feature.properties['Percent_2021_2022_Value'] <= 15.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20212022_4',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,187,217,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2021_2022_Value'] >= 15.000000 && feature.properties['Percent_2021_2022_Value'] <= 20.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20212022_4',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(137,107,177,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Percent_2021_2022_Value'] >= 20.000000 && feature.properties['Percent_2021_2022_Value'] <= 25.000000 ) {
+                return {
+                pane: 'pane_PercentofDepressionbyneighborhood20212022_4',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(129,15,124,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_PercentofDepressionbyneighborhood20212022_4');
+        map.getPane('pane_PercentofDepressionbyneighborhood20212022_4').style.zIndex = 404;
+        map.getPane('pane_PercentofDepressionbyneighborhood20212022_4').style['mix-blend-mode'] = 'normal';
+        var layer_PercentofDepressionbyneighborhood20212022_4 = new L.geoJson(json_PercentofDepressionbyneighborhood20212022_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PercentofDepressionbyneighborhood20212022_4',
+            layerName: 'layer_PercentofDepressionbyneighborhood20212022_4',
+            pane: 'pane_PercentofDepressionbyneighborhood20212022_4',
+            onEachFeature: pop_PercentofDepressionbyneighborhood20212022_4,
+            style: style_PercentofDepressionbyneighborhood20212022_4_0,
+        });
+        bounds_group.addLayer(layer_PercentofDepressionbyneighborhood20212022_4);
+        map.addLayer(layer_PercentofDepressionbyneighborhood20212022_4);
+        function pop_NYCNeighborhoodNames_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(String(feature.properties['OBJECTID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['UHFCODE'] !== null ? autolinker.link(String(feature.properties['UHFCODE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Leng'] !== null ? autolinker.link(String(feature.properties['SHAPE_Leng']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Area'] !== null ? autolinker.link(String(feature.properties['SHAPE_Area']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">UHF_NEIGH</th>\
+                        <td class="visible-with-data" id="UHF_NEIGH">' + (feature.properties['UHF_NEIGH'] !== null ? autolinker.link(String(feature.properties['UHF_NEIGH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">BOROUGH</th>\
+                        <td class="visible-with-data" id="BOROUGH">' + (feature.properties['BOROUGH'] !== null ? autolinker.link(String(feature.properties['BOROUGH']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_NYCNeighborhoodNames_5_0() {
+            return {
+                pane: 'pane_NYCNeighborhoodNames_5',
+                opacity: 1,
+                color: 'rgba(225,225,225,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,125,183,0.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_NYCNeighborhoodNames_5');
+        map.getPane('pane_NYCNeighborhoodNames_5').style.zIndex = 405;
+        map.getPane('pane_NYCNeighborhoodNames_5').style['mix-blend-mode'] = 'normal';
+        var layer_NYCNeighborhoodNames_5 = new L.geoJson(json_NYCNeighborhoodNames_5, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_NYCNeighborhoodNames_5',
+            layerName: 'layer_NYCNeighborhoodNames_5',
+            pane: 'pane_NYCNeighborhoodNames_5',
+            onEachFeature: pop_NYCNeighborhoodNames_5,
+            style: style_NYCNeighborhoodNames_5_0,
+        });
+        bounds_group.addLayer(layer_NYCNeighborhoodNames_5);
+        map.addLayer(layer_NYCNeighborhoodNames_5);
+        function pop_MentalHealthFacilityClusters_6(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['uid'] !== null ? autolinker.link(String(feature.properties['uid']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="facname" colspan="2"><strong>facname</strong><br />' + (feature.properties['facname'] !== null ? autolinker.link(String(feature.properties['facname']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['addressnum'] !== null ? autolinker.link(String(feature.properties['addressnum']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['streetname'] !== null ? autolinker.link(String(feature.properties['streetname']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">address</th>\
+                        <td class="visible-with-data" id="address">' + (feature.properties['address'] !== null ? autolinker.link(String(feature.properties['address']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">city</th>\
+                        <td class="visible-with-data" id="city">' + (feature.properties['city'] !== null ? autolinker.link(String(feature.properties['city']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">boro</th>\
+                        <td class="visible-with-data" id="boro">' + (feature.properties['boro'] !== null ? autolinker.link(String(feature.properties['boro']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['borocode'] !== null ? autolinker.link(String(feature.properties['borocode']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">zipcode</th>\
+                        <td class="visible-with-data" id="zipcode">' + (feature.properties['zipcode'] !== null ? autolinker.link(String(feature.properties['zipcode']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['latitude'] !== null ? autolinker.link(String(feature.properties['latitude']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['longitude'] !== null ? autolinker.link(String(feature.properties['longitude']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['xcoord'] !== null ? autolinker.link(String(feature.properties['xcoord']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ycoord'] !== null ? autolinker.link(String(feature.properties['ycoord']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['bin'] !== null ? autolinker.link(String(feature.properties['bin']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['bbl'] !== null ? autolinker.link(String(feature.properties['bbl']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['cd'] !== null ? autolinker.link(String(feature.properties['cd']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['council'] !== null ? autolinker.link(String(feature.properties['council']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ct2010'] !== null ? autolinker.link(String(feature.properties['ct2010']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ct2020'] !== null ? autolinker.link(String(feature.properties['ct2020']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nta2010'] !== null ? autolinker.link(String(feature.properties['nta2010']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nta2020'] !== null ? autolinker.link(String(feature.properties['nta2020']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['facgroup'] !== null ? autolinker.link(String(feature.properties['facgroup']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['facsubgrp'] !== null ? autolinker.link(String(feature.properties['facsubgrp']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">factype</th>\
+                        <td class="visible-with-data" id="factype">' + (feature.properties['factype'] !== null ? autolinker.link(String(feature.properties['factype']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['capacity'] !== null ? autolinker.link(String(feature.properties['capacity']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['captype'] !== null ? autolinker.link(String(feature.properties['captype']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['optype'] !== null ? autolinker.link(String(feature.properties['optype']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['opname'] !== null ? autolinker.link(String(feature.properties['opname']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['opabbrev'] !== null ? autolinker.link(String(feature.properties['opabbrev']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['overlevel'] !== null ? autolinker.link(String(feature.properties['overlevel']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['overagency'] !== null ? autolinker.link(String(feature.properties['overagency']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['overabbrev'] !== null ? autolinker.link(String(feature.properties['overabbrev']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['datasource'] !== null ? autolinker.link(String(feature.properties['datasource']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['facdomain'] !== null ? autolinker.link(String(feature.properties['facdomain']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['schooldist'] !== null ? autolinker.link(String(feature.properties['schooldist']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['policeprct'] !== null ? autolinker.link(String(feature.properties['policeprct']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['servarea'] !== null ? autolinker.link(String(feature.properties['servarea']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['geometry'] !== null ? autolinker.link(String(feature.properties['geometry']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_MentalHealthFacilityClusters_6_0() {
+            return {
+                pane: 'pane_MentalHealthFacilityClusters_6',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(125,139,143,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_MentalHealthFacilityClusters_6');
+        map.getPane('pane_MentalHealthFacilityClusters_6').style.zIndex = 406;
+        map.getPane('pane_MentalHealthFacilityClusters_6').style['mix-blend-mode'] = 'normal';
+        var layer_MentalHealthFacilityClusters_6 = new L.geoJson(json_MentalHealthFacilityClusters_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MentalHealthFacilityClusters_6',
+            layerName: 'layer_MentalHealthFacilityClusters_6',
+            pane: 'pane_MentalHealthFacilityClusters_6',
+            onEachFeature: pop_MentalHealthFacilityClusters_6,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_MentalHealthFacilityClusters_6_0(feature));
+            },
+        });
+        var cluster_MentalHealthFacilityClusters_6 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_MentalHealthFacilityClusters_6.addLayer(layer_MentalHealthFacilityClusters_6);
+
+        bounds_group.addLayer(layer_MentalHealthFacilityClusters_6);
+        function pop_MentalHealthFacilities_7(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="facname" colspan="2"><strong>facname</strong><br />' + (feature.properties['facname'] !== null ? autolinker.link(String(feature.properties['facname']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">address</th>\
+                        <td class="visible-with-data" id="address">' + (feature.properties['address'] !== null ? autolinker.link(String(feature.properties['address']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">city</th>\
+                        <td class="visible-with-data" id="city">' + (feature.properties['city'] !== null ? autolinker.link(String(feature.properties['city']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">boro</th>\
+                        <td class="visible-with-data" id="boro">' + (feature.properties['boro'] !== null ? autolinker.link(String(feature.properties['boro']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">zipcode</th>\
+                        <td class="visible-with-data" id="zipcode">' + (feature.properties['zipcode'] !== null ? autolinker.link(String(feature.properties['zipcode']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">factype</th>\
+                        <td class="visible-with-data" id="factype">' + (feature.properties['factype'] !== null ? autolinker.link(String(feature.properties['factype']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">opname</th>\
+                        <td class="visible-with-data" id="opname">' + (feature.properties['opname'] !== null ? autolinker.link(String(feature.properties['opname']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">opabbrev</th>\
+                        <td class="visible-with-data" id="opabbrev">' + (feature.properties['opabbrev'] !== null ? autolinker.link(String(feature.properties['opabbrev']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_MentalHealthFacilities_7_0() {
+            return {
+                pane: 'pane_MentalHealthFacilities_7',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(125,139,143,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_MentalHealthFacilities_7');
+        map.getPane('pane_MentalHealthFacilities_7').style.zIndex = 407;
+        map.getPane('pane_MentalHealthFacilities_7').style['mix-blend-mode'] = 'normal';
+        var layer_MentalHealthFacilities_7 = new L.geoJson(json_MentalHealthFacilities_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MentalHealthFacilities_7',
+            layerName: 'layer_MentalHealthFacilities_7',
+            pane: 'pane_MentalHealthFacilities_7',
+            onEachFeature: pop_MentalHealthFacilities_7,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_MentalHealthFacilities_7_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_MentalHealthFacilities_7);
+        var overlaysTree = [
+            {label: '<img src="legend/MentalHealthFacilities_7.png" /> Mental Health Facilities', layer: layer_MentalHealthFacilities_7},
+            {label: '<img src="legend/MentalHealthFacilityClusters_6.png" /> Mental Health Facility Clusters', layer: cluster_MentalHealthFacilityClusters_6},
+            {label: '<img src="legend/NYCNeighborhoodNames_5.png" /> NYC Neighborhood Names', layer: layer_NYCNeighborhoodNames_5},
+        {label: '<b>Depression by NYC Neighborhood</b>',  selectAllCheckbox: true, children: [
+            {label: 'Percent of "Depression" by neighborhood 2021 - 2022<br /><table><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20212022_4_35100.png" /></td><td>3.5 - 10 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20212022_4_10151.png" /></td><td>10 - 15 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20212022_4_15202.png" /></td><td>15 - 20 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20212022_4_20253.png" /></td><td>20 - 25 (%)</td></tr></table>', layer: layer_PercentofDepressionbyneighborhood20212022_4},
+            {label: 'Percent of "Depression" by neighborhood 2017 - 2018<br /><table><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20172018_3_5100.png" /></td><td>5 - 10 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20172018_3_10151.png" /></td><td>10 - 15 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20172018_3_15202.png" /></td><td>15 - 20 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyneighborhood20172018_3_20253.png" /></td><td>20 - 25 (%)</td></tr></table>', layer: layer_PercentofDepressionbyneighborhood20172018_3},]},
+        {label: '<b>Depression by NYC Borough</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: 'Percent of "Depression" by borough 2021 - 2022<br /><table><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20212022_2_1051250.png" /></td><td>10.5 - 12.5 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20212022_2_125151.png" /></td><td>12.5 - 15 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20212022_2_151752.png" /></td><td>15 - 17.5 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20212022_2_175203.png" /></td><td>17.5 - 20 (%)</td></tr></table>', layer: layer_PercentofDepressionbyborough20212022_2},
+            {label: 'Percent of "Depression" by borough 2017 - 2018<br /><table><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20172018_1_67100.png" /></td><td>6.7 - 10 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20172018_1_101251.png" /></td><td>10 - 12.5 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20172018_1_125152.png" /></td><td>12.5 - 15 (%)</td></tr><tr><td style="text-align: center;"><img src="legend/PercentofDepressionbyborough20172018_1_151753.png" /></td><td>15 - 17.5 (%)</td></tr></table>', layer: layer_PercentofDepressionbyborough20172018_1},]},
+        {label: '<b>Basemaps and Reference Info</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: "CartoDb Dark Matter", layer: layer_CartoDbDarkMatter_0},]},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: false, 
+        });
+        lay.addTo(map);
+		document.addEventListener("DOMContentLoaded", function() {
+            // set new Layers List height which considers toggle icon
+            function newLayersListHeight() {
+                var layerScrollbarElement = document.querySelector('.leaflet-control-layers-scrollbar');
+                if (layerScrollbarElement) {
+                    var layersListElement = document.querySelector('.leaflet-control-layers-list');
+                    var originalHeight = layersListElement.style.height 
+                        || window.getComputedStyle(layersListElement).height;
+                    var newHeight = parseFloat(originalHeight) - 50;
+                    layersListElement.style.height = newHeight + 'px';
+                }
+            }
+            var isLayersListExpanded = true;
+            var controlLayersElement = document.querySelector('.leaflet-control-layers');
+            var toggleLayerControl = document.querySelector('.leaflet-control-layers-toggle');
+            // toggle Collapsed/Expanded and apply new Layers List height
+            toggleLayerControl.addEventListener('click', function() {
+                if (isLayersListExpanded) {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                } else {
+                    controlLayersElement.classList.add('leaflet-control-layers-expanded');
+                }
+                isLayersListExpanded = !isLayersListExpanded;
+                newLayersListHeight()
+            });	
+			// apply new Layers List height if toggle layerstree
+			if (controlLayersElement) {
+				controlLayersElement.addEventListener('click', function(event) {
+					var toggleLayerHeaderPointer = event.target.closest('.leaflet-layerstree-header-pointer span');
+					if (toggleLayerHeaderPointer) {
+						newLayersListHeight();
+					}
+				});
+			}
+            // Collapsed/Expanded at Start to apply new height
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            // Collapsed touch/small screen
+            var isSmallScreen = window.innerWidth < 650;
+            if (isSmallScreen) {
+                setTimeout(function() {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                    isLayersListExpanded = !isLayersListExpanded;
+                }, 500);
+            }  
+        });       
+        setBounds();
+        var i = 0;
+        layer_NYCNeighborhoodNames_5.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['UHF_NEIGH'] !== null?String('<div style="color: #ffffff; font-size: 5pt; font-family: \'Gadugi\', sans-serif;">' + layer.feature.properties['UHF_NEIGH']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_NYCNeighborhoodNames_5'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_NYCNeighborhoodNames_5]);
+        map.on("zoomend", function(){
+            resetLabels([layer_NYCNeighborhoodNames_5]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_NYCNeighborhoodNames_5]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_NYCNeighborhoodNames_5]);
+        });
+        </script>        
+    </body>
+</html>
